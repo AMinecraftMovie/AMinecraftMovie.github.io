@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        iframe {
+            border: none;
+        }
+        .settings {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .settings:hover {
+            opacity: 1;
+        }
+        .settings-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .settings-menu input[type="range"] {
+            width: 100%;
+        }
+        .settings-menu label {
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings" id="settings">
+        ⚙️
+    </div>
+    <div class="settings-menu" id="settingsMenu">
+        <label for="skipTime">Skip to time (seconds):</label>
+        <input type="number" id="skipTime" min="0" step="1">
+        <button onclick="skipToTime()">Go</button>
+
+        <label for="playbackSpeed">Playback speed:</label>
+        <input type="range" id="playbackSpeed" min="0.5" max="2" step="0.1" value="1" oninput="changeSpeed(this.value)">
+
+        <label for="volume">Volume:</label>
+        <input type="range" id="volume" min="0" max="1" step="0.1" value="1" oninput="changeVolume(this.value)">
+
+        <label for="seek">Seek:</label>
+        <input type="range" id="seek" min="0" max="100" step="1" value="0" oninput="seekVideo(this.value)">
+
+        <button onclick="togglePlayPause()" id="playPause">Pause</button>
+    </div>
+
+    <iframe id="videoPlayer" src="https://drive.google.com/file/d/1hoiDlg8ZLn1VZo9CwnRaKSsGU4Y8Y8Jf/preview" width="1920" height="1080" allow="autoplay"></iframe>
+
+    <script>
+        const settings = document.getElementById('settings');
+        const settingsMenu = document.getElementById('settingsMenu');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        let isPlaying = true; // Assuming video starts playing by default
+
+        settings.addEventListener('mouseenter', () => {
+            settings.style.opacity = 1;
+        });
+
+        settings.addEventListener('mouseleave', () => {
+            settings.style.opacity = 0;
+        });
+
+        settings.addEventListener('click', () => {
+            settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        function skipToTime() {
+            const time = document.getElementById('skipTime').value;
+            videoPlayer.contentWindow.postMessage({ event: 'seek', seconds: time }, '*');
+        }
+
+        function changeSpeed(speed) {
+            videoPlayer.contentWindow.postMessage({ event: 'setPlaybackRate', rate: speed }, '*');
+        }
+
+        function changeVolume(volume) {
+            videoPlayer.contentWindow.postMessage({ event: 'setVolume', volume: volume }, '*');
+        }
+
+        function seekVideo(value) {
+            // Assuming the max value of the slider maps to the video's duration (this requires actual video metadata)
+            // Adjust as necessary
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                videoPlayer.contentWindow.postMessage({ event: 'pause' }, '*');
+                document.getElementById('playPause').innerText = 'Play';
+            } else {
+                videoPlayer.contentWindow.postMessage({ event: 'play' }, '*');
+                document.getElementById('playPause').innerText = 'Pause';
+            }
+            isPlaying = !isPlaying;
+        }
+    </script>
+</body>
+</html>
